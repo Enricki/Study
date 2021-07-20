@@ -39,7 +39,7 @@ public class UserManager : MonoBehaviour
     }
     public void AddUser()
     {
-        if (nameField.text != null && ageField.text != null && bioField != null)
+        if (nameField.text != string.Empty && ageField.text != string.Empty && bioField.text != string.Empty)
         {
             windowsManager.users.Add(new User(nameField.text, ageField.text, bioField.text));
             FillList();
