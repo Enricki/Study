@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
 using System.IO;
+using System.Collections.Generic;
 
 public struct User
 {
@@ -24,6 +25,8 @@ public class UserManager : MonoBehaviour
     [SerializeField]
     private TMP_InputField bioField;
     [SerializeField]
+    private TMP_InputField SearchField;
+    [SerializeField]
     private Field field;
     [SerializeField]
     private RectTransform listContent;
@@ -35,26 +38,75 @@ public class UserManager : MonoBehaviour
     private void Start()
     {
         windowsManager = this.GetComponentInParent<WindowsManager>();
-        path = Path.Combine(Application.persistentDataPath, "users.dat");
+        //path = Path.Combine(Application.persistentDataPath, "users.dat");
+        path = Path.Combine(Application.streamingAssetsPath, "users.dat");
     }
     public void AddUser()
     {
         if (nameField.text != string.Empty && ageField.text != string.Empty && bioField.text != string.Empty)
         {
             windowsManager.users.Add(new User(nameField.text, ageField.text, bioField.text));
-            FillList();
+            AddField(nameField.text, ageField.text);
         }
     }
 
-    public void FillList()
+
+    public void SortByName()
+    {
+        IComparer<User> comparer = new NewOrder();
+        List<User> users = new List<User>();
+
+        for (int i = 0; i < windowsManager.users.Count; i++)
+        {
+            users.Add(windowsManager.users[i]);
+        }
+        ClearList();
+        windowsManager.fields.Clear();
+
+        users.Sort(comparer);
+
+        for (int i = 0; i < users.Count; i++)
+        {
+            windowsManager.users.Add(users[i]);
+            AddField(users[i].Name, users[i].Age);
+        }
+        users.Clear();
+    }
+
+    public void SearchByName()
+    {
+        if (SearchField.text != string.Empty)
+        { 
+            for (int i = 0; i < windowsManager.users.Count; i++)
+            {
+                if (!windowsManager.users[i].Name.Contains(SearchField.text))
+                {
+                    listContent.transform.GetChild(i).gameObject.SetActive(false);
+                }
+                else
+                {
+                    listContent.transform.GetChild(i).gameObject.SetActive(true);
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < listContent.transform.childCount; i++)
+            {
+                listContent.transform.GetChild(i).gameObject.SetActive(true);
+            }
+        }
+    }
+
+    public void AddField(string name, string age)
     {
         Field item = Instantiate(field);
         item.transform.SetParent(listContent, false);
-        item.GetComponentInChildren<TMP_Text>().text = nameField.text + ": " + ageField.text + " years";
+        item.GetComponentInChildren<TMP_Text>().text = name + ": " + age + " yo";
         windowsManager.fields.Add(item);
-        nameField.text = null;
-        ageField.text = null;
-        bioField.text = null;
+        nameField.text = string.Empty;
+        ageField.text = string.Empty;
+        bioField.text = string.Empty;
     }
 
 
@@ -85,7 +137,7 @@ public class UserManager : MonoBehaviour
 
             Field item = Instantiate(field);
             item.transform.SetParent(listContent, false);
-            item.GetComponentInChildren<TMP_Text>().text = windowsManager.users[i].Name + ": " + windowsManager.users[i].Age + " years";
+            item.GetComponentInChildren<TMP_Text>().text = windowsManager.users[i].Name + ": " + windowsManager.users[i].Age + " yo";
             windowsManager.fields.Add(item);
         }
     }
@@ -94,9 +146,9 @@ public class UserManager : MonoBehaviour
     {
         windowsManager.users.Clear();
 
-        nameField.text = null;
-        ageField.text = null;
-        bioField.text = null;
+        nameField.text = string.Empty;
+        ageField.text = string.Empty;
+        bioField.text = string.Empty;
 
         for(int i = 0; i < listContent.transform.childCount; i ++)
         {
