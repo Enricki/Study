@@ -2,6 +2,7 @@ using UnityEngine;
 using TMPro;
 using System.IO;
 using System.Collections.Generic;
+using System;
 
 public struct User
 {
@@ -33,7 +34,7 @@ public class UserManager : MonoBehaviour
 
     private WindowsManager windowsManager;
     private string path;
-
+ 
 
     private void Start()
     {
@@ -76,7 +77,11 @@ public class UserManager : MonoBehaviour
     public void SearchByName()
     {
         if (SearchField.text != string.Empty)
-        { 
+        {
+            if (SearchField.text.ToCharArray().Length == 1)
+            {
+                SearchField.text = SearchField.text.ToUpper();
+            }
             for (int i = 0; i < windowsManager.users.Count; i++)
             {
                 if (!windowsManager.users[i].Name.Contains(SearchField.text))
